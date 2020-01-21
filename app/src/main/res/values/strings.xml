@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Projet Image Mobile</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="capture">Capture</string>
+    <string name="library">Bibliothèque</string>
+    <string name="search">Rechercher</string>
+    <string name="imageView">Affiche l\'image choisie</string>
+</resources>

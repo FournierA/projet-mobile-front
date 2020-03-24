@@ -17,7 +17,7 @@
             android:layout_height="70dp"
             android:layout_marginStart="4dp"
             android:layout_marginEnd="4dp"
-            android:onClick="dispatchTakePictureIntent"
+            android:onClick="takePictureIntent"
             android:text="@string/capture"
             app:layout_constraintEnd_toStartOf="@+id/library"
             app:layout_constraintHorizontal_bias="0.5"

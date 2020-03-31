@@ -9,9 +9,11 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
@@ -26,6 +28,11 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.projetimagemobile.R;
+import com.google.android.material.snackbar.Snackbar;
+import com.isseiaoki.simplecropview.CropImageView;
+import com.isseiaoki.simplecropview.callback.CropCallback;
+import com.isseiaoki.simplecropview.callback.LoadCallback;
+import com.isseiaoki.simplecropview.callback.SaveCallback;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -35,9 +42,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
-
-import static android.os.Environment.getExternalStoragePublicDirectory;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -52,8 +56,8 @@ public class MainActivity extends AppCompatActivity {
     private String filePath = "no path";
     private Uri photoURI = null;
 
-    private ImageView imageView;
     private Button searchButton;
+    private CropImageView mCropView;
 
 
     @Override
@@ -61,8 +65,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        imageView = findViewById(R.id.imageView);
         searchButton = findViewById(R.id.search);
+        mCropView = findViewById(R.id.cropImageView);
+        mCropView.setCropMode(CropImageView.CropMode.FREE);
+        mCropView.setOutputMaxSize(224, 224);
 
         hasPermissions(this, permissions);
         if (!hasPermissions(this, permissions)) {
@@ -78,9 +84,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             try {
                 Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                File photoFile = createImageFile();
+                File photoFile = createImageFile(false);
                 if (photoFile != null) {
-                    //Log.d("LOG_TAG", "Photofile not null");
                     photoURI = FileProvider.getUriForFile(this,
                             "com.example.projetimagemobile.fileprovider",
                             photoFile);
@@ -114,35 +119,22 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (resultCode == RESULT_OK) {
+            Snackbar mySnackbar;
             switch (requestCode){
                 case REQUEST_IMAGE_CAPTURE :
-                    try {
-                        final InputStream imageStream = getContentResolver().openInputStream(photoURI);
-                        final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                        filePath = photoURI.getPath();
-
-                        Matrix matrix = new Matrix();
-                        matrix.postRotate(90.0f);
-                        Bitmap toTranform =
-                                Bitmap.createBitmap(selectedImage, 0, 0, selectedImage.getWidth(), selectedImage.getHeight(), matrix, true);
-                        Glide.with(this).load(toTranform).into(imageView);
-                        searchButton.setEnabled(true);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if (photoURI != null) {
+                        mCropView.load(photoURI).execute(mLoadCallback);
+                        mySnackbar = Snackbar.make(findViewById(R.id.cropImageView), R.string.cropInfo, 2000);
+                        mySnackbar.show();
+                    } else {
+                        Log.d("LOG_TAG", "Photo URI is NULL");
                     }
                     break;
                 case REQUEST_LOAD_IMAGE :
-                    try {
-                        final Uri imageUri = data.getData();
-                        final InputStream imageStream = getContentResolver().openInputStream(imageUri);
-                        final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
-                        filePath = getRealPathFromURI(imageUri);
-                        Glide.with(this).load(selectedImage).into(imageView);
-                        searchButton.setEnabled(true);
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                        Toast.makeText(this, "Une erreur est survenue", Toast.LENGTH_LONG).show();
-                    }
+                    photoURI = data.getData();
+                    mCropView.load(photoURI).execute(mLoadCallback);
+                    mySnackbar = Snackbar.make(findViewById(R.id.cropImageView), R.string.cropInfo, 2000);
+                    mySnackbar.show();
                     break;
                 default:
                     break;
@@ -153,30 +145,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void search(View view) {
-        if (filePath != "no path") {
-            Intent i = new Intent(this, ResultsViewActivity.class);
-            i.putExtra("filePath", filePath);
-            startActivity(i);
-        } else {
+        if (photoURI != null) {
             searchButton.setEnabled(false);
-            Toast.makeText(this, "Veuillez sélectionner une image avant d'effectuer une recherche", Toast.LENGTH_SHORT).show();
+            mCropView.crop(photoURI).execute(mCropCallback);
+        } else {
+            Toast.makeText(MainActivity.this, "Veuillez sélectionner une image avant d'effectuer une recherche", Toast.LENGTH_SHORT).show();
         }
-
+    }
+    public void rotate(View view) {
+        if (photoURI != null) {
+            mCropView.rotateImage(CropImageView.RotateDegrees.ROTATE_90D); // rotate clockwise
+        } else {
+            Toast.makeText(this, "Vous n'avez pas choisi d'image", Toast.LENGTH_SHORT).show();
+            Log.d("LOG_TAG", "PhotoURI is NULL");
+        }
     }
 
+    // -------------------------------------------------------- //
+    // --------------- UTILS PRIVATE FUNCTIONS ---------------- //
+    // -------------------------------------------------------- //
 
-
-    // -------------- UTILS PRIVATE FUNCTIONS ----------------- //
-
-    private File createImageFile() throws IOException {
+    private File createImageFile(boolean cropped) throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "IMG_" + timeStamp + ".jpg";
+        String imageFileName = "IMG_" + timeStamp;
+        if (cropped) {
+            imageFileName = "CROP_" + imageFileName + timeStamp;
+        }
+        imageFileName += ".jpg";
 
         // Create folders
         File clothesDir = new File(Environment.getExternalStorageDirectory(), "Clothes Detector");
         File pictureDir = new File(Environment.getExternalStorageDirectory(), "Clothes Detector/savedPictures");
-
         if(!clothesDir.exists()) {
             boolean isClothesDirCreated = clothesDir.mkdirs();
             Log.d("LOG_TAG", "Create Clothes Detector Directory : "+isClothesDirCreated);
@@ -195,34 +195,63 @@ public class MainActivity extends AppCompatActivity {
         File image = new File(pictureDir, imageFileName);
         return image;
     }
-    private String getRealPathFromURI(Uri uri) {
-        Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-        cursor.moveToFirst();
-        int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-        return cursor.getString(idx);
-    }
     private static boolean hasPermissions(Context context, String... permissions) {
         if (context != null && permissions != null) {
-            for (String permission : permissions) {
-                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
-                    return false;
-                }
-            }
+            for (String permission : permissions)
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {return false;}
         }
         return true;
     }
-    private boolean checkCameraPermission()
-    {
+    private boolean checkCameraPermission() {
         String permission = "android.permission.CAMERA";
         int res = this.checkCallingOrSelfPermission(permission);
         return (res == PackageManager.PERMISSION_GRANTED);
     }
-    private boolean checkStoragePermission()
-    {
+    private boolean checkStoragePermission() {
         String permission = "android.permission.READ_EXTERNAL_STORAGE";
         int res = this.checkCallingOrSelfPermission(permission);
         return (res == PackageManager.PERMISSION_GRANTED);
     }
+
+    // ------------------------------------------------ //
+    // ----------------- CROP CALLBACKS --------------- //
+    // ------------------------------------------------ //
+
+    private final LoadCallback mLoadCallback = new LoadCallback() {
+        @Override
+        public void onSuccess() {}
+        @Override
+        public void onError(Throwable e) {Log.d("LOG_TAG", "LoadCallBack Error : "+e.getMessage());}
+    };
+    private final CropCallback mCropCallback = new CropCallback() {
+        @Override
+        public void onSuccess(Bitmap cropped) {
+            try {
+                Uri fileUri = Uri.fromFile(createImageFile(true));
+                mCropView.save(cropped).execute(fileUri, mSaveCallback);
+            } catch (IOException e) {e.printStackTrace();}
+        }
+        @Override
+        public void onError(Throwable e) {Log.d("LOG_TAG", "CropCallBack Error : "+e.getMessage());}
+    };
+    private final SaveCallback mSaveCallback = new SaveCallback() {
+        @Override
+        public void onSuccess(final Uri outputUri) {
+            filePath = outputUri.getPath();
+            if (filePath != "no path") {
+                Intent i = new Intent(MainActivity.this, ResultsViewActivity.class);
+                Log.d("LOG_TAg", filePath);
+                i.putExtra("filePath", filePath);
+                startActivity(i);
+                searchButton.setEnabled(true);
+            } else {
+                searchButton.setEnabled(false);
+                Toast.makeText(MainActivity.this, "Veuillez sélectionner une image avant d'effectuer une recherche", Toast.LENGTH_SHORT).show();
+            }
+        }
+        @Override
+        public void onError(Throwable e) {Log.d("LOG_TAG", "SaveCallBack Error : "+e.getMessage());}
+    };
 
 }
 

@@ -65,7 +65,7 @@ public class ResultsViewActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<ImageApiBody> call, Response<ImageApiBody> response) {
                 if(response.isSuccessful()) {
-                    Log.d("LOG_TAG", "Success Response : " + response.body().toString());
+                    Log.d("LOG_TAG", "Success Response : " + response.body());
                     getPictures();
                 } else {
                     Log.d("LOG_TAG", "Failure Response : " + response.raw().toString());

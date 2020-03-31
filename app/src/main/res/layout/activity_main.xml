@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".view.MainActivity">
@@ -38,31 +39,60 @@
             app:layout_constraintStart_toEndOf="@+id/capture"
             app:layout_constraintTop_toTopOf="@+id/capture" />
 
-        <ImageView
-            android:id="@+id/imageView"
+        <com.isseiaoki.simplecropview.CropImageView
+            android:id="@+id/cropImageView"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:contentDescription="@string/imageView"
-            app:layout_constraintBottom_toTopOf="@+id/search"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/searchLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/capture"
-            tools:srcCompat="@tools:sample/avatars" />
+            app:scv_background_color="@color/windowBackground"
+            app:scv_crop_mode="fit_image"
+            app:scv_frame_color="@color/colorAccent"
+            app:scv_frame_stroke_weight="1dp"
+            app:scv_guide_color="@color/colorAccent"
+            app:scv_guide_show_mode="show_always"
+            app:scv_guide_stroke_weight="1dp"
+            app:scv_handle_color="@color/colorAccent"
+            app:scv_handle_show_mode="show_always"
+            app:scv_handle_size="14dp"
+            app:scv_min_frame_size="50dp"
+            app:scv_overlay_color="@color/overlay"
+            app:scv_touch_padding="8dp" />
 
-        <Button
-            android:id="@+id/search"
-            android:layout_width="0dp"
-            android:layout_height="86dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:onClick="search"
-            android:text="@string/search"
+        <LinearLayout
+            android:id="@+id/searchLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView" />
+            app:layout_constraintTop_toBottomOf="@+id/cropImageView">
+
+
+            <ImageButton
+                android:id="@+id/rotateButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:contentDescription="rotation of image"
+                android:onClick="rotate"
+                app:srcCompat="@android:drawable/ic_menu_rotate" />
+
+            <Button
+                android:id="@+id/search"
+                android:layout_width="0dp"
+                android:layout_height="60dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:onClick="search"
+                android:text="@string/search" />
+        </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

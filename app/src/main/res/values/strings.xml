@@ -3,6 +3,8 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="capture">Capture</string>
     <string name="library">Bibliothèque</string>
-    <string name="search">Rechercher</string>
+    <string name="search">Redimensionner et Rechercher</string>
     <string name="imageView">Affiche l\'image choisie</string>
+    <string name="cropInfo">Cibler la zone que vous souhaitez rechercher</string>
+
 </resources>

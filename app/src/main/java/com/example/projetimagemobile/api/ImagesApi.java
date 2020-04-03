@@ -3,6 +3,8 @@ package com.example.projetimagemobile.api;
 import com.example.projetimagemobile.model.ImageApiBody;
 import com.example.projetimagemobile.model.ImagesApiResponse;
 
+import java.util.List;
+
 import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -13,8 +15,8 @@ import retrofit2.http.Query;
 
 public interface ImagesApi {
 
-        @GET("/api/images/")
-        Call<ImagesApiResponse> getImagesList(@Query("format") String format);
+        @GET("/api/images/result/")
+        Call<List<ImagesApiResponse>> getImagesList(@Query("format") String format);
 
         @Multipart
         @POST("/api/images/")

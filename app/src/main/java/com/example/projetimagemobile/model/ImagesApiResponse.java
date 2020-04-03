@@ -7,30 +7,32 @@ import java.util.ArrayList;
 
 public class ImagesApiResponse {
 
-    @SerializedName("images")
+    @SerializedName("img_path")
     @Expose
-    ArrayList<Images> images = new ArrayList<>();
+    private String img_path;
+
+    @SerializedName("score")
+    @Expose
+    private float score;
+
+    public String getImg_path() {
+        return img_path;
+    }
+
+    public float getScore() {
+        return score;
+    }
+
+    /*ArrayList<Images> images = new ArrayList<>();
 
     public ArrayList<Images> getImages() {
         return images;
     }
 
     public class Images {
-        @SerializedName("id")
-        @Expose
-        private int id;
 
-        @SerializedName("file")
-        @Expose
-        private String file;
+    }*/
 
-        public int getId() {
-            return id;
-        }
 
-        public String getFile() {
-            return file;
-        }
-    }
 
 }

@@ -17,6 +17,9 @@ import com.example.projetimagemobile.model.ImagesApiResponse;
 import com.google.gson.Gson;
 
 import java.io.File;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -34,6 +37,7 @@ public class ResultsViewActivity extends AppCompatActivity {
     private LinearLayoutManager linearLayoutManager;
     private ImagesApi mAPIService;
     private String filePath;
+    private List<ImagesApiResponse> dataArrayList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,30 +78,32 @@ public class ResultsViewActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<ImageApiBody> call, Throwable t) {
                 Log.d("LOG_TAG", "URL : " + call.request().toString());
-                Log.d("LOG_TAG", "Error :  " + t.getMessage());
+                Log.d("LOG_TAG", "POST Error onFailure:  " + t.getMessage());
             }
         });
     }
 
     public void getPictures() {
-        mAPIService.getImagesList("json").enqueue(new Callback<ImagesApiResponse>() {
+        dataArrayList = new ArrayList<>();
+        mAPIService.getImagesList("json").enqueue(new Callback<List<ImagesApiResponse>>() {
             @Override
-            public void onResponse(Call<ImagesApiResponse> call, Response<ImagesApiResponse> response) {
+            public void onResponse(Call<List<ImagesApiResponse>> call, Response<List<ImagesApiResponse>> response) {
                 if(response.isSuccessful()) {
-                    ImagesApiResponse images = response.body();
-                    DataAdapter dataAdapter = new DataAdapter(getApplicationContext(), images);
+//                    ImagesApiResponse images = response.body();
+                    dataArrayList = response.body();
+                    DataAdapter dataAdapter = new DataAdapter(getApplicationContext(), dataArrayList);
                     recyclerView.setAdapter(dataAdapter);
 
-                    String json = new Gson().toJson(images);
+                    String json = new Gson().toJson(dataArrayList);
                     Log.d("LOG_TAG", "Object to String : " +  json);
                 } else {
                     Log.d("LOG_TAG", "Failure Response : " + response.raw().toString());
                 }
             }
             @Override
-            public void onFailure(Call<ImagesApiResponse> call, Throwable t) {
+            public void onFailure(Call<List<ImagesApiResponse>> call, Throwable t) {
                 Log.d("LOG_TAG", "URL : " + call.request().toString());
-                Log.d("LOG_TAG", "Error :  " + t.getMessage());
+                Log.d("LOG_TAG", "GET Error onFailure :  " + t.getMessage());
             }
         });
     }

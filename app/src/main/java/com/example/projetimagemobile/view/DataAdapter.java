@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -13,11 +14,13 @@ import com.example.projetimagemobile.R;
 import com.example.projetimagemobile.api.ApiUtils;
 import com.example.projetimagemobile.model.ImagesApiResponse;
 
+import java.util.List;
+
 public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
-    private ImagesApiResponse imageUrls;
+    private List<ImagesApiResponse> imageUrls;
     private Context context;
 
-    public DataAdapter(Context context, ImagesApiResponse imageUrls) {
+    public DataAdapter(Context context, List<ImagesApiResponse> imageUrls) {
         this.context = context;
         this.imageUrls = imageUrls;
     }
@@ -34,11 +37,11 @@ public class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
      */
     @Override
     public void onBindViewHolder(ViewHolder viewHolder, int i) {
-        Glide.with(context).load(ApiUtils.API_BASE_URL+imageUrls.getImages().get(i).getFile()).into(viewHolder.img);
+        Glide.with(context).load(ApiUtils.API_BASE_URL+imageUrls.get(i).getImg_path()).into(viewHolder.img);
     }
     @Override
     public int getItemCount() {
-        return imageUrls.getImages().size();
+        return 5;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

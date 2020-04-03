@@ -145,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void search(View view) {
+        // TODO Ajouter une round progress bar pour montrer l'état de chargement
         if (photoURI != null) {
             searchButton.setEnabled(false);
             mCropView.crop(photoURI).execute(mCropCallback);

@@ -5,4 +5,7 @@
     <color name="colorAccent">#D81B60</color>
     <color name="windowBackground">#aaffffff</color>
     <color name="overlay">#aa1c1c1c</color>
+    <color name="red">#FF0000</color>
+    <color name="redDark">#aa0000</color>
+    <color name="white">#FFFFFF</color>
 </resources>

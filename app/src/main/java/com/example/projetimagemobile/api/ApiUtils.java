@@ -1,8 +1,5 @@
 package com.example.projetimagemobile.api;
 
-import com.example.projetimagemobile.api.ImagesApi;
-import com.example.projetimagemobile.api.RetrofitClient;
-
 public class ApiUtils {
 
     private ApiUtils() {}
